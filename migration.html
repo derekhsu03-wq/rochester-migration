@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Migration patterns of new Rochester Residents</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #182126;
+      --muted: #58666d;
+      --paper: #f5f2ea;
+      --card: #fff;
+      --accent: #005f73;
+      --line: #d9d4c8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    header, main, footer { width: min(1320px, calc(100% - 32px)); margin-inline: auto; }
+    header { padding: 48px 0 24px; }
+    h1 { max-width: 850px; margin: 4px 0 12px; font-size: clamp(2rem, 5vw, 4.2rem); line-height: 1; }
+    h2 { margin: 0; font-size: 1.35rem; }
+    p { line-height: 1.55; }
+    .eyebrow { margin: 0; color: var(--accent); font-size: .78rem; font-weight: 800; letter-spacing: .13em; }
+    .subtitle { max-width: 800px; color: var(--muted); font-size: 1.08rem; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .card {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card);
+      box-shadow: 0 8px 24px rgb(30 41 46 / 7%);
+    }
+    .card-heading { padding: 22px 24px 0; }
+    .chart { width: 100%; height: 460px; }
+    footer { padding: 28px 0 48px; color: var(--muted); font-size: .9rem; }
+    footer strong { color: var(--ink); }
+    .error { padding: 16px; border: 1px solid #a11; color: #800; background: #fff5f5; }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .chart { height: 420px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">ROCHESTER, MINNESOTA</p>
+    <h1>Migration patterns of new Rochester Residents</h1>
+    <p class="subtitle">Annual American Community Survey (ACS) estimates of residents who have lived in Rochester for at least one year</p>
+  </header>
+  <main>
+    <p id="error" class="error" role="alert" hidden></p>
+    <div class="grid">
+      <section class="card">
+        <div class="card-heading"><h2>All residents: estimated counts</h2></div>
+        <div id="all-count" class="chart" aria-label="Migration counts for all residents"></div>
+      </section>
+      <section class="card">
+        <div class="card-heading"><h2>All residents: percentage</h2></div>
+        <div id="all-percent" class="chart" aria-label="Migration percentages for all residents"></div>
+      </section>
+      <section class="card">
+        <div class="card-heading"><h2>Ages 25-34: estimated counts</h2></div>
+        <div id="age-count" class="chart" aria-label="Migration counts for residents ages 25 to 34 with error bars"></div>
+      </section>
+      <section class="card">
+        <div class="card-heading"><h2>Ages 25-34: percentage</h2></div>
+        <div id="age-percent" class="chart" aria-label="Migration percentages for residents ages 25 to 34 with error bars"></div>
+      </section>
+    </div>
+  </main>
+  <footer>
+    <p><strong>Source:</strong> U.S. Census Bureau, American Community Survey 1-Year Estimates, Subject Table S0701. The 2020 estimate uses the available ACS 5-Year Estimates because standard 1-year estimates were not published for that year.</p>
+    <p>All residents who have lived in Rochester for more than one year.</p>
+  </footer>
+  <script>
+    const DATA = [{"year":2016,"source":"ACSST1Y2016.S0701-2026-11-02T203253.xlsx","total_population":112537,"age_population":18271,"all_population":{"same_county":{"count":8103,"count_moe":1913,"percent":7.2,"percent_moe":1.7},"same_state":{"count":3376,"count_moe":900,"percent":3.0,"percent_moe":0.8},"different_state":{"count":4614,"count_moe":1238,"percent":4.1,"percent_moe":1.1},"abroad":{"count":1688,"count_moe":1238,"percent":1.5,"percent_moe":1.1},"total_moved":{"count":17781,"count_moe":2746,"percent":15.8,"percent_moe":2.4}},"age_25_34":{"same_county":{"count":2649,"count_moe":872,"percent":14.5,"percent_moe":4.7},"same_state":{"count":877,"count_moe":387,"percent":4.8,"percent_moe":2.1},"different_state":{"count":1224,"count_moe":498,"percent":6.7,"percent_moe":2.7},"abroad":{"count":329,"count_moe":293,"percent":1.8,"percent_moe":1.6},"total_moved":{"count":5079,"count_moe":1139,"percent":27.8,"percent_moe":6.0}}},{"year":2017,"source":"ACSST1Y2017.S0701-2026-11-02T203240.xlsx","total_population":115004,"age_population":18365,"all_population":{"same_county":{"count":8510,"count_moe":2070,"percent":7.4,"percent_moe":1.8},"same_state":{"count":2645,"count_moe":1035,"percent":2.3,"percent_moe":0.9},"different_state":{"count":3565,"count_moe":920,"percent":3.1,"percent_moe":0.8},"abroad":{"count":1725,"count_moe":1380,"percent":1.5,"percent_moe":1.2},"total_moved":{"count":16446,"count_moe":2848,"percent":14.3,"percent_moe":2.5}},"age_25_34":{"same_county":{"count":2112,"count_moe":771,"percent":11.5,"percent_moe":4.1},"same_state":{"count":1028,"count_moe":484,"percent":5.6,"percent_moe":2.6},"different_state":{"count":1396,"count_moe":634,"percent":7.6,"percent_moe":3.4},"abroad":{"count":624,"count_moe":535,"percent":3.4,"percent_moe":2.9},"total_moved":{"count":5161,"count_moe":1277,"percent":28.1,"percent_moe":6.6}}},{"year":2018,"source":"ACSST1Y2018.S0701-2026-11-02T203225.xlsx","total_population":115812,"age_population":18231,"all_population":{"same_county":{"count":10076,"count_moe":2201,"percent":8.7,"percent_moe":1.9},"same_state":{"count":5327,"count_moe":2085,"percent":4.6,"percent_moe":1.8},"different_state":{"count":4517,"count_moe":1506,"percent":3.9,"percent_moe":1.3},"abroad":{"count":695,"count_moe":463,"percent":0.6,"percent_moe":0.4},"total_moved":{"count":20615,"count_moe":3417,"percent":17.8,"percent_moe":2.9}},"age_25_34":{"same_county":{"count":3300,"count_moe":987,"percent":18.1,"percent_moe":5.2},"same_state":{"count":1568,"count_moe":885,"percent":8.6,"percent_moe":4.8},"different_state":{"count":1695,"count_moe":689,"percent":9.3,"percent_moe":3.7},"abroad":{"count":109,"count_moe":183,"percent":0.6,"percent_moe":1.0},"total_moved":{"count":6673,"count_moe":1570,"percent":36.6,"percent_moe":8.0}}},{"year":2019,"source":"ACSST1Y2019.S0701-2026-11-02T203200.xlsx","total_population":117826,"age_population":20346,"all_population":{"same_county":{"count":10958,"count_moe":4124,"percent":9.3,"percent_moe":3.5},"same_state":{"count":3653,"count_moe":1414,"percent":3.1,"percent_moe":1.2},"different_state":{"count":4242,"count_moe":1296,"percent":3.6,"percent_moe":1.1},"abroad":{"count":1060,"count_moe":707,"percent":0.9,"percent_moe":0.6},"total_moved":{"count":19913,"count_moe":4604,"percent":16.9,"percent_moe":3.9}},"age_25_34":{"same_county":{"count":2686,"count_moe":998,"percent":13.2,"percent_moe":4.8},"same_state":{"count":936,"count_moe":635,"percent":4.6,"percent_moe":3.1},"different_state":{"count":1139,"count_moe":576,"percent":5.6,"percent_moe":2.8},"abroad":{"count":305,"count_moe":306,"percent":1.5,"percent_moe":1.5},"total_moved":{"count":5066,"count_moe":1385,"percent":24.9,"percent_moe":6.5}}},{"year":2020,"source":"ACSST5Y2020.S0701-2026-11-02T212155.xlsx","total_population":115692,"age_population":18938,"all_population":{"same_county":{"count":10065,"count_moe":1273,"percent":8.7,"percent_moe":1.1},"same_state":{"count":3702,"count_moe":694,"percent":3.2,"percent_moe":0.6},"different_state":{"count":4975,"count_moe":694,"percent":4.3,"percent_moe":0.6},"abroad":{"count":1157,"count_moe":347,"percent":1.0,"percent_moe":0.3},"total_moved":{"count":19899,"count_moe":1645,"percent":17.2,"percent_moe":1.4}},"age_25_34":{"same_county":{"count":2898,"count_moe":402,"percent":15.3,"percent_moe":2.1},"same_state":{"count":1155,"count_moe":304,"percent":6.1,"percent_moe":1.6},"different_state":{"count":1685,"count_moe":418,"percent":8.9,"percent_moe":2.2},"abroad":{"count":284,"count_moe":133,"percent":1.5,"percent_moe":0.7},"total_moved":{"count":6022,"count_moe":676,"percent":31.8,"percent_moe":3.5}}},{"year":2021,"source":"ACSST1Y2021.S0701-2026-11-02T203118.xlsx","total_population":120184,"age_population":16761,"all_population":{"same_county":{"count":10336,"count_moe":2284,"percent":8.6,"percent_moe":1.9},"same_state":{"count":4327,"count_moe":1563,"percent":3.6,"percent_moe":1.3},"different_state":{"count":3726,"count_moe":1082,"percent":3.1,"percent_moe":0.9},"abroad":{"count":601,"count_moe":361,"percent":0.5,"percent_moe":0.3},"total_moved":{"count":18989,"count_moe":2994,"percent":15.8,"percent_moe":2.5}},"age_25_34":{"same_county":{"count":2263,"count_moe":945,"percent":13.5,"percent_moe":5.5},"same_state":{"count":570,"count_moe":522,"percent":3.4,"percent_moe":3.1},"different_state":{"count":1827,"count_moe":740,"percent":10.9,"percent_moe":4.3},"abroad":{"count":486,"count_moe":338,"percent":2.9,"percent_moe":2.0},"total_moved":{"count":5146,"count_moe":1406,"percent":30.7,"percent_moe":7.9}}},{"year":2022,"source":"ACSST1Y2022.S0701-2026-11-02T203053.xlsx","total_population":119871,"age_population":19447,"all_population":{"same_county":{"count":10549,"count_moe":2758,"percent":8.8,"percent_moe":2.3},"same_state":{"count":5634,"count_moe":1319,"percent":4.7,"percent_moe":1.1},"different_state":{"count":5514,"count_moe":2877,"percent":4.6,"percent_moe":2.4},"abroad":{"count":1558,"count_moe":1558,"percent":1.3,"percent_moe":1.3},"total_moved":{"count":23255,"count_moe":4480,"percent":19.4,"percent_moe":3.7}},"age_25_34":{"same_county":{"count":2723,"count_moe":1279,"percent":14.0,"percent_moe":6.5},"same_state":{"count":1031,"count_moe":569,"percent":5.3,"percent_moe":2.9},"different_state":{"count":1381,"count_moe":688,"percent":7.1,"percent_moe":3.5},"abroad":{"count":408,"count_moe":371,"percent":2.1,"percent_moe":1.9},"total_moved":{"count":5542,"count_moe":1636,"percent":28.5,"percent_moe":8.2}}},{"year":2023,"source":"ACSST1Y2023.S0701-2026-11-02T203020.xlsx","total_population":120289,"age_population":21599,"all_population":{"same_county":{"count":6135,"count_moe":1925,"percent":5.1,"percent_moe":1.6},"same_state":{"count":7338,"count_moe":3008,"percent":6.1,"percent_moe":2.5},"different_state":{"count":3488,"count_moe":1083,"percent":2.9,"percent_moe":0.9},"abroad":{"count":2045,"count_moe":1203,"percent":1.7,"percent_moe":1.0},"total_moved":{"count":19006,"count_moe":3922,"percent":15.8,"percent_moe":3.3}},"age_25_34":{"same_county":{"count":2700,"count_moe":1226,"percent":12.5,"percent_moe":5.6},"same_state":{"count":1188,"count_moe":568,"percent":5.5,"percent_moe":2.6},"different_state":{"count":1382,"count_moe":656,"percent":6.4,"percent_moe":3.0},"abroad":{"count":497,"count_moe":412,"percent":2.3,"percent_moe":1.9},"total_moved":{"count":5767,"count_moe":1596,"percent":26.7,"percent_moe":7.1}}},{"year":2024,"source":"ACSST1Y2024.S0701-2026-11-02T203004.xlsx","total_population":122138,"age_population":20057,"all_population":{"same_county":{"count":7328,"count_moe":2199,"percent":6.0,"percent_moe":1.8},"same_state":{"count":3176,"count_moe":1222,"percent":2.6,"percent_moe":1.0},"different_state":{"count":4763,"count_moe":1588,"percent":3.9,"percent_moe":1.3},"abroad":{"count":366,"count_moe":366,"percent":0.3,"percent_moe":0.3},"total_moved":{"count":15634,"count_moe":2998,"percent":12.8,"percent_moe":2.5}},"age_25_34":{"same_county":{"count":2246,"count_moe":987,"percent":11.2,"percent_moe":4.8},"same_state":{"count":501,"count_moe":424,"percent":2.5,"percent_moe":2.1},"different_state":{"count":2166,"count_moe":985,"percent":10.8,"percent_moe":4.8},"abroad":{"count":181,"count_moe":221,"percent":0.9,"percent_moe":1.1},"total_moved":{"count":5094,"count_moe":1525,"percent":25.4,"percent_moe":7.2}}},{"year":2025,"source":"ACSST1Y2025.S0701-2026-11-02T202943.xlsx","total_population":121302,"age_population":20270,"all_population":{"same_county":{"count":13343,"count_moe":3155,"percent":11.0,"percent_moe":2.6},"same_state":{"count":2669,"count_moe":728,"percent":2.2,"percent_moe":0.6},"different_state":{"count":4124,"count_moe":1577,"percent":3.4,"percent_moe":1.3},"abroad":{"count":970,"count_moe":607,"percent":0.8,"percent_moe":0.5},"total_moved":{"count":21107,"count_moe":3654,"percent":17.4,"percent_moe":3.0}},"age_25_34":{"same_county":{"count":3669,"count_moe":1489,"percent":18.1,"percent_moe":7.1},"same_state":{"count":426,"count_moe":347,"percent":2.1,"percent_moe":1.7},"different_state":{"count":1216,"count_moe":821,"percent":6.0,"percent_moe":4.0},"abroad":{"count":385,"count_moe":367,"percent":1.9,"percent_moe":1.8},"total_moved":{"count":5696,"count_moe":1825,"percent":28.1,"percent_moe":8.5}}}];
+    const CATEGORIES = [{"key": "same_county", "label": "Moved within same county"}, {"key": "same_state", "label": "Moved from different county, same state"}, {"key": "different_state", "label": "Moved from different state"}, {"key": "abroad", "label": "Moved from abroad"}, {"key": "total_moved", "label": "Total moved"}];
+    const COLORS = ["#005f73", "#ca6702", "#7b2cbf", "#2a9d8f", "#1b1f23"];
+    const YEARS = DATA.map(row => row.year);
+    const plotConfig = {responsive: true, displaylogo: false, modeBarButtonsToRemove: ["lasso2d", "select2d"]};
+
+    function traces(group, measure, withError) {
+      return CATEGORIES.map((category, index) => {
+        const values = DATA.map(row => row[group][category.key][measure]);
+        const isTotal = category.key === "total_moved";
+        const trace = {
+          type: "scatter",
+          mode: "lines+markers",
+          name: category.label,
+          x: YEARS,
+          y: values,
+          line: {color: COLORS[index], width: 3, dash: isTotal ? "dash" : "solid"},
+          marker: {size: 7, symbol: isTotal ? "diamond" : "circle"},
+          hovertemplate: measure === "count"
+            ? `<b>${category.label}</b><br>%{x}: %{y:,.0f}<extra></extra>`
+            : `<b>${category.label}</b><br>%{x}: %{y:.1f}%<extra></extra>`
+        };
+        if (withError) {
+          const errorMeasure = measure === "count" ? "count_moe" : "percent_moe";
+          trace.error_y = {
+            type: "data",
+            array: DATA.map(row => row[group][category.key][errorMeasure]),
+            visible: true,
+            color: COLORS[index],
+            thickness: 1.2,
+            width: 4
+          };
+        }
+        return trace;
+      });
+    }
+
+    function layout(yTitle, percent, tickStep) {
+      return {
+        margin: {l: 68, r: 28, t: 34, b: 62},
+        paper_bgcolor: "#fff",
+        plot_bgcolor: "#fff",
+        hovermode: "x unified",
+        legend: {orientation: "h", y: 1.18, x: 0, font: {size: 11}},
+        xaxis: {
+          title: "Year",
+          tickmode: "array",
+          tickvals: YEARS,
+          gridcolor: "#ece8df",
+          fixedrange: false
+        },
+        yaxis: {
+          title: yTitle,
+          ticksuffix: percent ? "%" : "",
+          dtick: tickStep,
+          tickformat: percent ? ".0f" : ",.0f",
+          rangemode: "tozero",
+          gridcolor: "#ece8df",
+          zerolinecolor: "#aaa"
+        },
+        font: {family: "Inter, system-ui, sans-serif", color: "#182126"}
+      };
+    }
+
+    if (typeof Plotly === "undefined") {
+      const error = document.getElementById("error");
+      error.hidden = false;
+      error.textContent = "The chart library could not load. Check your internet connection and reload this page.";
+    } else {
+      Plotly.newPlot("all-count", traces("all_population", "count", true), layout("Estimated residents", false, 2000), plotConfig);
+      Plotly.newPlot("all-percent", traces("all_population", "percent", true), layout("Percent of residents", true, 5), plotConfig);
+      Plotly.newPlot("age-count", traces("age_25_34", "count", true), layout("Estimated residents age 25-34", false, 1000), plotConfig);
+      Plotly.newPlot("age-percent", traces("age_25_34", "percent", true), layout("Percent of residents age 25-34", true, 5), plotConfig);
+    }
+  </script>
+</body>
+</html>
